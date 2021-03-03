@@ -13,11 +13,17 @@ function doWork(){
         "小号4",
     
     ]
-    // 因为所有的小号密码一样，所以没有使用数组
-    var key = "密码"
+    var key = [
+        "小号1密码",
+        "小号2密码",
+        "小号3密码",
+        "小号4密码",
+        "小号5密码",
+
+        ]
     // 三星健康刷步数
-    console.log("三星健康刷步数启动")
-    var step = steps(6)
+    //console.log("三星健康刷步数启动")
+    //var step = steps(0)
     console.log('开始切换账号进行运动同步')
     for (let accont = 0; accont < accont_list.length; accont++) {
         // 登录账号
@@ -26,7 +32,7 @@ function doWork(){
             "正在登录第"+ (accont+1) + "个账号\n"+
             "账号："+ accont_list[accont]
         )
-        login(accont_list[accont], key)
+        login(accont_list[accont], key[accont])
         // 进入运动
         console.log("正在进入运动等待同步完成...")
         go_sports();
@@ -74,8 +80,10 @@ function clickCenter(obj) {
 function steps(count) {
     launchApp('三星健康');
     sleep(1000);
-    launchApp('三星健康步数管理');
+    sleep(1000);
+    app.launch("com.samsung.android.app.health.dataviewer");
     idContains("floatingActionButton").waitFor()
+    sleep(1000)
     sleep(1000)
     for (let index = 0; index < count; index++) {
         idContains("floatingActionButton").findOne().click()
@@ -114,17 +122,17 @@ function login(accont, key) {
     setText(0, accont);
     textMatches("下一步").findOne(5000)
     click("下一步")
-    idContains("loginButton").waitFor()
-    var obj = textMatches(/短信验证码登录|忘记密码?|换个方式登录/).findOne().text()
-    if (obj == "短信验证码登录") {
-        sleep(200)
+    textContains("换个方式登录").waitFor()
+    var obj = textMatches(/短信验证码登录|指纹登录|换个方式登录/).findOne().text()
+    if (obj == "短信验证码登录" || obj == "指纹登录") {
+        sleep(500)
         textMatches(/换个验证方式|换个方式登录/).findOne()
-        click("换个验证方式")
-        click("换个方式登录")
+        clickCenter(text("换个方式登录").findOne(2000))
+        clickCenter(text("换个验证方式").findOne(2000))
         text("密码登录").findOne()
-        sleep(200)
-        while (!click("密码登录")) { }
         sleep(400)
+        while (!click("密码登录")) { }
+        sleep(200)
         setText(0, accont);
         sleep(200);
         setText(1, key);
@@ -157,8 +165,6 @@ function go_sports() {
         text('立即捐步').findOne()
         sleep(200)
         while (!click("立即捐步")) {}
-        sleep(500)
-        clickCenter(text("知道了").findOne(1000))
         console.log('捐步成功')
     }else{
         console.log('已经捐完步数了')
@@ -196,7 +202,7 @@ function enterForest(){
     app.startActivity({
         data: "alipayqr://platformapi/startapp?saId=60000002"
     })
-    sleep(2000)
+    sleep(8000)
 }
 
 /**
